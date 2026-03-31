@@ -16,8 +16,15 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = False
 
-    # Database
+    # Database — accepts plain postgresql:// or postgresql+asyncpg://
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/meezan"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def fix_db_url(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     # Supabase
     supabase_url: str = ""
