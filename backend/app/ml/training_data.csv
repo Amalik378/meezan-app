@@ -1,0 +1,113 @@
+ticker,company_name,sector,debt_to_assets,interest_to_revenue,receivables_to_assets,sector_is_haram,label
+AAPL,Apple Inc.,Technology,0.31,0.01,0.06,0,1
+MSFT,Microsoft Corporation,Technology,0.17,0.02,0.08,0,1
+GOOGL,Alphabet Inc.,Technology,0.06,0.02,0.07,0,1
+NVDA,NVIDIA Corporation,Semiconductors,0.12,0.01,0.09,0,1
+META,Meta Platforms,Technology,0.05,0.02,0.05,0,1
+ADBE,Adobe Inc.,Technology,0.20,0.01,0.10,0,1
+CRM,Salesforce Inc.,Technology,0.14,0.01,0.11,0,1
+AMZN,Amazon.com,E-Commerce,0.27,0.01,0.06,0,1
+TSLA,Tesla Inc.,Electric Vehicles,0.17,0.01,0.04,0,1
+PFE,Pfizer Inc.,Pharmaceuticals,0.22,0.02,0.10,0,1
+JNJ,Johnson & Johnson,Healthcare,0.24,0.01,0.09,0,1
+NVO,Novo Nordisk,Pharmaceuticals,0.10,0.01,0.08,0,1
+NFLX,Netflix Inc.,Streaming Media,0.30,0.03,0.04,0,1
+ORCL,Oracle Corporation,Technology,0.69,0.03,0.07,0,0
+INTC,Intel Corporation,Semiconductors,0.28,0.02,0.08,0,1
+AMD,Advanced Micro Devices,Semiconductors,0.10,0.01,0.09,0,1
+QCOM,Qualcomm Inc.,Semiconductors,0.38,0.02,0.12,0,0
+MRK,Merck & Co.,Pharmaceuticals,0.30,0.02,0.11,0,1
+ABBV,AbbVie Inc.,Pharmaceuticals,0.82,0.04,0.08,0,0
+TMO,Thermo Fisher Scientific,Healthcare Equipment,0.25,0.02,0.11,0,1
+ABT,Abbott Laboratories,Healthcare,0.27,0.01,0.12,0,1
+UNH,UnitedHealth Group,Healthcare,0.29,0.01,0.14,0,1
+LLY,Eli Lilly and Co.,Pharmaceuticals,0.26,0.02,0.09,0,1
+COST,Costco Wholesale,Retail,0.32,0.01,0.02,0,0
+WMT,Walmart Inc.,Retail,0.31,0.01,0.03,0,1
+TGT,Target Corporation,Retail,0.38,0.02,0.04,0,0
+NKE,Nike Inc.,Apparel,0.32,0.01,0.16,0,0
+CAT,Caterpillar Inc.,Industrial Machinery,0.64,0.03,0.15,0,0
+HON,Honeywell International,Industrial Conglomerate,0.34,0.02,0.12,0,0
+DE,Deere & Company,Agricultural Machinery,0.72,0.04,0.20,0,0
+GE,GE Vernova,Industrial,0.31,0.02,0.11,0,1
+MMM,3M Company,Industrial Conglomerate,0.62,0.04,0.16,0,0
+SBUX,Starbucks Corporation,Food & Beverage,0.87,0.06,0.05,0,0
+MCD,McDonald's Corporation,Food & Beverage,1.22,0.08,0.04,0,0
+YUM,Yum! Brands,Restaurants,1.55,0.12,0.05,0,0
+KO,Coca-Cola Company,Soft Drinks,0.66,0.04,0.09,0,0
+PEP,PepsiCo Inc.,Beverages,0.55,0.03,0.10,0,0
+JPM,JPMorgan Chase,Conventional Banking,0.89,0.48,0.52,1,0
+BAC,Bank of America,Conventional Banking,0.88,0.45,0.51,1,0
+WFC,Wells Fargo,Conventional Banking,0.87,0.42,0.50,1,0
+C,Citigroup,Conventional Banking,0.90,0.47,0.53,1,0
+GS,Goldman Sachs,Conventional Banking,0.90,0.55,0.60,1,0
+MS,Morgan Stanley,Conventional Banking,0.89,0.50,0.58,1,0
+USB,US Bancorp,Conventional Banking,0.86,0.40,0.48,1,0
+PNC,PNC Financial,Conventional Banking,0.85,0.38,0.46,1,0
+V,Visa Inc.,Conventional Banking,0.35,0.07,0.06,1,0
+MA,Mastercard Inc.,Conventional Banking,0.42,0.06,0.07,1,0
+AXP,American Express,Conventional Banking,0.80,0.35,0.45,1,0
+BRK.B,Berkshire Hathaway,Conventional Insurance,0.27,0.06,0.08,1,0
+MET,MetLife Inc.,Conventional Insurance,0.88,0.28,0.40,1,0
+PRU,Prudential Financial,Conventional Insurance,0.91,0.32,0.42,1,0
+AIG,American Intl Group,Conventional Insurance,0.85,0.30,0.38,1,0
+PM,Philip Morris Intl,Tobacco,0.92,0.08,0.08,1,0
+MO,Altria Group,Tobacco,1.10,0.09,0.04,1,0
+BTI,British American Tobacco,Tobacco,0.55,0.07,0.09,1,0
+BUD,Anheuser-Busch InBev,Alcoholic Beverages,0.47,0.12,0.07,1,0
+DEO,Diageo plc,Alcoholic Beverages,0.52,0.07,0.10,1,0
+SAM,Boston Beer Company,Alcoholic Beverages,0.08,0.04,0.12,1,0
+MGM,MGM Resorts,Gambling & Casinos,0.65,0.14,0.06,1,0
+LVS,Las Vegas Sands,Gambling & Casinos,0.72,0.16,0.05,1,0
+WYNN,Wynn Resorts,Gambling & Casinos,0.88,0.18,0.04,1,0
+RTX,RTX Corporation,Defense & Aerospace,0.31,0.04,0.11,1,0
+LMT,Lockheed Martin,Defense & Aerospace,0.85,0.04,0.09,1,0
+NOC,Northrop Grumman,Defense & Aerospace,0.50,0.04,0.10,1,0
+GD,General Dynamics,Defense & Aerospace,0.30,0.03,0.11,1,0
+BA,Boeing Company,Defense & Aerospace,1.45,0.06,0.14,1,0
+SPOT,Spotify Technology,Streaming Media,0.18,0.02,0.10,0,1
+UBER,Uber Technologies,Transportation,0.25,0.02,0.08,0,1
+LYFT,Lyft Inc.,Transportation,0.15,0.01,0.06,0,1
+ABNB,Airbnb Inc.,Travel & Hospitality,0.14,0.02,0.07,0,1
+BKNG,Booking Holdings,Travel & Hospitality,0.52,0.05,0.06,0,0
+EXPD,Expeditors International,Logistics,0.10,0.01,0.18,0,1
+UPS,United Parcel Service,Logistics,0.52,0.03,0.10,0,0
+FDX,FedEx Corporation,Logistics,0.41,0.02,0.11,0,0
+PANW,Palo Alto Networks,Cybersecurity,0.20,0.01,0.12,0,1
+CRWD,CrowdStrike Holdings,Cybersecurity,0.15,0.01,0.13,0,1
+SNOW,Snowflake Inc.,Cloud Software,0.05,0.01,0.10,0,1
+DDOG,Datadog Inc.,Cloud Software,0.07,0.01,0.08,0,1
+ZS,Zscaler Inc.,Cybersecurity,0.14,0.01,0.09,0,1
+NOW,ServiceNow Inc.,Enterprise Software,0.12,0.01,0.10,0,1
+TEAM,Atlassian Corporation,Software,0.10,0.01,0.07,0,1
+SHOP,Shopify Inc.,E-Commerce Platform,0.06,0.01,0.06,0,1
+SQ,Block Inc.,Fintech,0.22,0.08,0.15,1,0
+PYPL,PayPal Holdings,Fintech,0.38,0.12,0.20,1,0
+SOFI,SoFi Technologies,Conventional Banking,0.72,0.42,0.48,1,0
+AFRM,Affirm Holdings,Fintech,0.65,0.35,0.40,1,0
+DIS,The Walt Disney Company,Entertainment,0.38,0.03,0.07,0,0
+CMCSA,Comcast Corporation,Media & Telecom,0.46,0.04,0.08,0,0
+T,AT&T Inc.,Telecommunications,0.42,0.03,0.07,0,0
+VZ,Verizon Communications,Telecommunications,0.53,0.04,0.08,0,0
+TMUS,T-Mobile US,Telecommunications,0.45,0.03,0.06,0,1
+XOM,Exxon Mobil,Oil & Gas,0.21,0.01,0.08,0,1
+CVX,Chevron Corporation,Oil & Gas,0.16,0.01,0.09,0,1
+COP,ConocoPhillips,Oil & Gas,0.22,0.01,0.07,0,1
+SLB,SLB (Schlumberger),Oilfield Services,0.30,0.02,0.14,0,1
+NEE,NextEra Energy,Renewable Energy,0.39,0.04,0.03,0,0
+ENPH,Enphase Energy,Solar Energy,0.18,0.01,0.12,0,1
+FSLR,First Solar Inc.,Solar Energy,0.09,0.01,0.10,0,1
+BEP,Brookfield Renewable,Renewable Energy,0.49,0.05,0.04,0,0
+SEDG,SolarEdge Technologies,Solar Energy,0.16,0.01,0.14,0,1
+AMT,American Tower Corp,Real Estate (Telecom),0.62,0.05,0.04,0,0
+PLD,Prologis Inc.,Real Estate,0.30,0.04,0.02,0,0
+EQR,Equity Residential,Real Estate,0.37,0.04,0.02,0,0
+SPG,Simon Property Group,Real Estate,0.72,0.08,0.03,1,0
+O,Realty Income Corp,Real Estate,0.45,0.06,0.02,0,0
+TSMC,Taiwan Semiconductor,Semiconductors,0.23,0.01,0.10,0,1
+ASML,ASML Holding,Semiconductors,0.27,0.01,0.12,0,1
+TXN,Texas Instruments,Semiconductors,0.39,0.02,0.09,0,0
+AVGO,Broadcom Inc.,Semiconductors,0.44,0.03,0.07,0,0
+MU,Micron Technology,Semiconductors,0.28,0.02,0.10,0,1
+LRCX,Lam Research,Semiconductor Equipment,0.28,0.02,0.14,0,1
+KLAC,KLA Corporation,Semiconductor Equipment,0.37,0.02,0.12,0,0

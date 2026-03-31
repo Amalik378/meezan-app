@@ -1,0 +1,80 @@
+{
+  "expo": {
+    "name": "Meezan — Islamic Finance",
+    "slug": "meezan",
+    "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "scheme": "meezan",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B4D3E"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.meezan.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Meezan uses Face ID to keep your financial data secure.",
+        "NSCameraUsageDescription": "Meezan uses the camera to scan documents.",
+        "CFBundleLocalizations": ["en", "ar"],
+        "CFBundleDevelopmentRegion": "en"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B4D3E"
+      },
+      "package": "com.meezan.app",
+      "versionCode": 1,
+      "permissions": []
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png",
+      "meta": {
+        "themeColor": "#1B4D3E",
+        "description": "Zakat calculator, Shariah stock screener, and Sadaqah tracker for Muslim investors.",
+        "og:title": "Meezan — Islamic Finance",
+        "og:description": "Track your Zakat, screen halal stocks, and record your Sadaqah in one beautiful app.",
+        "og:type": "website"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1B4D3E",
+          "image": "./assets/splash.png",
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "supabaseUrl": "",
+      "supabaseAnonKey": "",
+      "eas": {
+        "projectId": ""
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/",
+      "enabled": false,
+      "fallbackToCacheTimeout": 0
+    },
+    "owner": "abdullahmalik"
+  }
+}
