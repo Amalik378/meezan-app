@@ -8,6 +8,11 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import { Colors } from '@/constants/theme';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
+// Silently ping the backend on startup so Render wakes up before the user
+// tries to submit anything. Fire-and-forget — we don't care about the result.
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
+fetch(`${API_URL}/health`).catch(() => {});
+
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({

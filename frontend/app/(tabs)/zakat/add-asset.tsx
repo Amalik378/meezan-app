@@ -66,16 +66,34 @@ export default function AddAssetScreen() {
 
   async function onSubmit(data: FormData) {
     setSubmitError(null);
-    try {
-      await addAsset.mutateAsync({
-        asset_type: data.asset_type,
-        description: data.description,
-        value_gbp: Number(data.value_gbp),
-        hawl_start_date: data.hawl_start_date,
-      });
-      router.back();
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to add asset.');
+    const payload = {
+      asset_type: data.asset_type,
+      description: data.description,
+      value_gbp: Number(data.value_gbp),
+      hawl_start_date: data.hawl_start_date,
+    };
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await addAsset.mutateAsync(payload);
+        router.back();
+        return;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        const isNetworkErr = msg === 'Network Error' || msg.toLowerCase().includes('timeout');
+        if (isNetworkErr && attempt < 2) {
+          setSubmitError('Server is starting up, please wait…');
+          await new Promise((r) => setTimeout(r, 8000));
+          setSubmitError(null);
+        } else {
+          setSubmitError(
+            isNetworkErr
+              ? 'Server took too long to respond. Try again in a moment.'
+              : (msg || 'Failed to add asset.')
+          );
+          return;
+        }
+      }
     }
   }
 
