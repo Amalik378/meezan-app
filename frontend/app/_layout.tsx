@@ -47,7 +47,8 @@ function AuthGuard() {
     // Normal auth routing (onboarding already done)
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (isAuthenticated && inAuthGroup) {
+    } else if (isAuthenticated && (inAuthGroup || inOnboarding)) {
+      // Authenticated users don't belong on auth screens or onboarding
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, isLoading, segments, router, onboardingDone]);

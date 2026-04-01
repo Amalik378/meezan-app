@@ -96,7 +96,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     // ── Dev mode: skip Supabase, use static token ──────────────────────────
     if (DEV_MODE) {
       await authStorage.setItem('access_token', 'dev');
-      set({ user: DEV_USER, isAuthenticated: true, isLoading: false, onboardingDone });
+      // Restore any user details saved from a previous signUp/signIn
+      const storedDevUser = await AsyncStorage.getItem('dev_user');
+      const user = storedDevUser ? JSON.parse(storedDevUser) : DEV_USER;
+      set({ user, isAuthenticated: true, isLoading: false, onboardingDone });
       return;
     }
 
@@ -150,7 +153,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   signIn: async (email, password) => {
     if (DEV_MODE) {
       await authStorage.setItem('access_token', 'dev');
-      set({ user: DEV_USER, isAuthenticated: true });
+      // Load any previously saved user details for this dev session
+      const storedDevUser = await AsyncStorage.getItem('dev_user');
+      const user = storedDevUser ? JSON.parse(storedDevUser) : { ...DEV_USER, email };
+      await AsyncStorage.setItem('dev_user', JSON.stringify(user));
+      set({ user, isAuthenticated: true });
       return;
     }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -171,8 +178,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signUp: async (email, password, fullName) => {
     if (DEV_MODE) {
+      const user = { ...DEV_USER, email, fullName };
       await authStorage.setItem('access_token', 'dev');
-      set({ user: { ...DEV_USER, email, fullName }, isAuthenticated: true });
+      await AsyncStorage.setItem('dev_user', JSON.stringify(user));
+      set({ user, isAuthenticated: true });
       return;
     }
     const { error } = await supabase.auth.signUp({
@@ -186,6 +195,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     if (!DEV_MODE) await supabase.auth.signOut();
     await authStorage.removeItem('access_token');
+    // Keep dev_user in storage so name persists if they sign back in
     set({ user: null, isAuthenticated: false });
   },
 }));
