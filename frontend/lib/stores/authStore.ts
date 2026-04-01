@@ -9,7 +9,7 @@ import Constants from 'expo-constants';
 // When EXPO_PUBLIC_DEV_MODE=true the app bypasses Supabase entirely.
 // The backend accepts the static token "dev" in DEBUG mode.
 const DEV_MODE = process.env.EXPO_PUBLIC_DEV_MODE === 'true';
-const DEV_USER = { id: '00000000-0000-0000-0000-000000000001', email: 'dev@meezan.local', fullName: 'Developer' };
+const DEV_USER = { id: '00000000-0000-0000-0000-000000000001', email: 'dev@meezan.local', fullName: undefined as string | undefined };
 
 // Use || (not ??) so empty strings from app.json fall through to the .env vars
 const SUPABASE_URL =
@@ -98,7 +98,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       await authStorage.setItem('access_token', 'dev');
       // Restore any user details saved from a previous signUp/signIn
       const storedDevUser = await AsyncStorage.getItem('dev_user');
-      const user = storedDevUser ? JSON.parse(storedDevUser) : DEV_USER;
+      let user = storedDevUser ? JSON.parse(storedDevUser) : { ...DEV_USER };
+      // Migration: strip legacy 'Developer' placeholder name stored by older builds
+      if (user.fullName === 'Developer') user = { ...user, fullName: undefined };
       set({ user, isAuthenticated: true, isLoading: false, onboardingDone });
       return;
     }
@@ -153,10 +155,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   signIn: async (email, password) => {
     if (DEV_MODE) {
       await authStorage.setItem('access_token', 'dev');
-      // Load any previously saved user details for this dev session
+      // Restore stored user — sign-in can't know the name, so preserve whatever was saved at sign-up
       const storedDevUser = await AsyncStorage.getItem('dev_user');
-      const user = storedDevUser ? JSON.parse(storedDevUser) : { ...DEV_USER, email };
-      await AsyncStorage.setItem('dev_user', JSON.stringify(user));
+      let user = storedDevUser ? JSON.parse(storedDevUser) : { ...DEV_USER, email };
+      // Migration: strip legacy 'Developer' placeholder name
+      if (user.fullName === 'Developer') user = { ...user, fullName: undefined };
       set({ user, isAuthenticated: true });
       return;
     }
