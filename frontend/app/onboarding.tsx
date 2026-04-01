@@ -1,20 +1,16 @@
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
+  Animated,
   Pressable,
   StyleSheet,
   Text,
   View,
-  ViewToken,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Spacing, Typography } from '@/constants/theme';
 import { useAuthStore } from '@/lib/stores/authStore';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const SLIDES = [
   {
@@ -60,52 +56,60 @@ const SLIDES = [
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { completeOnboarding } = useAuthStore();
-  const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 });
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0) {
-        setActiveIndex(viewableItems[0].index ?? 0);
-      }
-    }
-  );
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   async function handleFinish() {
-    await completeOnboarding(); // writes AsyncStorage + updates store → AuthGuard reacts
+    await completeOnboarding();
+  }
+
+  function goToSlide(index: number) {
+    Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+      setActiveIndex(index);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+    });
   }
 
   function handleNext() {
     if (activeIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: activeIndex + 1 });
+      goToSlide(activeIndex + 1);
     } else {
       handleFinish();
     }
   }
 
+  const slide = SLIDES[activeIndex];
+
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom + Spacing.xl }]}>
-      <FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        keyExtractor={(item) => item.id}
-        onViewableItemsChanged={onViewableItemsChanged.current}
-        viewabilityConfig={viewabilityConfig.current}
-        renderItem={({ item }) => <Slide slide={item} />}
-      />
+      {/* Slide content — fades between slides */}
+      <Animated.View style={[styles.slideWrap, { opacity: fadeAnim }]}>
+        <View style={[styles.slide, { paddingTop: insets.top + Spacing.xxl }]}>
+          <View style={[styles.iconCircle, { backgroundColor: `${slide.accent}18` }]}>
+            <Ionicons name={slide.icon} size={52} color={slide.accent} />
+          </View>
+          <Text style={[styles.arabicTitle, { color: slide.accent }]}>{slide.arabicTitle}</Text>
+          <Text style={styles.slideTitle}>{slide.title}</Text>
+          <Text style={styles.slideSubtitle}>{slide.subtitle}</Text>
+          <View style={styles.bullets}>
+            {slide.bullets.map((bullet, i) => (
+              <View key={i} style={styles.bulletRow}>
+                <View style={[styles.bulletDot, { backgroundColor: slide.accent }]} />
+                <Text style={styles.bulletText}>{bullet}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </Animated.View>
 
       {/* Dots + Navigation */}
       <View style={styles.footer}>
         <View style={styles.dots}>
           {SLIDES.map((_, i) => (
-            <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
+            <Pressable key={i} onPress={() => goToSlide(i)}>
+              <View style={[styles.dot, i === activeIndex && styles.dotActive]} />
+            </Pressable>
           ))}
         </View>
 
@@ -132,37 +136,10 @@ export default function OnboardingScreen() {
   );
 }
 
-function Slide({ slide }: { slide: typeof SLIDES[0] }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.slide, { paddingTop: insets.top + Spacing.xxl, width: SCREEN_WIDTH }]}>
-      {/* Icon circle */}
-      <View style={[styles.iconCircle, { backgroundColor: `${slide.accent}18` }]}>
-        <Ionicons name={slide.icon} size={52} color={slide.accent} />
-      </View>
-
-      {/* Arabic title */}
-      <Text style={[styles.arabicTitle, { color: slide.accent }]}>{slide.arabicTitle}</Text>
-
-      <Text style={styles.slideTitle}>{slide.title}</Text>
-      <Text style={styles.slideSubtitle}>{slide.subtitle}</Text>
-
-      {/* Bullet points */}
-      <View style={styles.bullets}>
-        {slide.bullets.map((bullet, i) => (
-          <View key={i} style={styles.bulletRow}>
-            <View style={[styles.bulletDot, { backgroundColor: slide.accent }]} />
-            <Text style={styles.bulletText}>{bullet}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.surface },
 
+  slideWrap: { flex: 1 },
   slide: {
     flex: 1,
     paddingHorizontal: Spacing.xxl,
