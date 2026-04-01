@@ -24,8 +24,10 @@ from collections import defaultdict
 from datetime import UTC, date, datetime
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.user import UserProfile
 from app.models.zakat import ZakatAsset, ZakatRecord
 from app.schemas.zakat import (
     AssetBreakdownItem,
@@ -76,11 +78,22 @@ class ZakatService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+    async def _ensure_profile(self, user_id: str) -> None:
+        """Create user_profiles row if it doesn't exist. Idempotent."""
+        stmt = (
+            pg_insert(UserProfile)
+            .values(id=uuid.UUID(user_id), madhab="hanafi", nisab_type="silver")
+            .on_conflict_do_nothing(index_elements=["id"])
+        )
+        await self.db.execute(stmt)
+        await self.db.flush()
+
     # ── Asset CRUD ─────────────────────────────────────────────────────────────
 
     async def add_asset(
         self, user_id: str, payload: ZakatAssetCreate
     ) -> ZakatAssetResponse:
+        await self._ensure_profile(user_id)
         asset = ZakatAsset(
             user_id=uuid.UUID(user_id),
             asset_type=payload.asset_type,
@@ -135,6 +148,7 @@ class ZakatService:
         Preview the Zakat calculation for the user's current assets.
         Does NOT persist a record — use finalise() for that.
         """
+        await self._ensure_profile(user_id)
         assets = await self._get_active_assets(user_id)
         nisab = await NisabService(self.db).get_current_nisab()
 
