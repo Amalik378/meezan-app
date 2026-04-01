@@ -3,18 +3,24 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +30,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { AssetConfig, Colors, Radius, Spacing, Typography } from '@/constants/theme';
-import { useDeleteAsset, useZakatAssets, useZakatCalculation } from '@/lib/hooks/useZakat';
+import { useDeleteAsset, useUpdateAsset, useZakatAssets, useZakatCalculation } from '@/lib/hooks/useZakat';
+import type { ZakatAsset } from '@/lib/api/zakat';
 import { formatGBP } from '@/lib/utils/currency';
 import { formatDate, hawlComplete, hawlProgress } from '@/lib/utils/date';
 
@@ -67,7 +74,55 @@ export default function ZakatScreen() {
   const { data: assets, isLoading, refetch } = useZakatAssets();
   const { data: calculation } = useZakatCalculation();
   const deleteAsset = useDeleteAsset();
+  const updateAsset = useUpdateAsset();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Edit modal state
+  const [editingAsset, setEditingAsset] = useState<ZakatAsset | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const modalSlide = useSharedValue(300);
+  const modalSheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: modalSlide.value }],
+  }));
+
+  function openEdit(asset: ZakatAsset) {
+    setEditingAsset(asset);
+    setEditValue(asset.value_gbp.toString());
+    setEditDesc(asset.description);
+    modalSlide.value = withSpring(0, { damping: 14, stiffness: 120 });
+  }
+
+  function closeEdit() {
+    modalSlide.value = withTiming(300, { duration: 200 }, (finished) => {
+      if (finished) {
+        // Must run on JS thread
+      }
+    });
+    setTimeout(() => setEditingAsset(null), 210);
+  }
+
+  async function saveEdit() {
+    if (!editingAsset) return;
+    const val = parseFloat(editValue);
+    if (isNaN(val) || val <= 0) {
+      Alert.alert('Invalid value', 'Please enter a valid amount greater than 0.');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await updateAsset.mutateAsync({
+        id: editingAsset.id,
+        payload: { value_gbp: val, description: editDesc.trim() || editingAsset.description },
+      });
+      closeEdit();
+    } catch {
+      Alert.alert('Error', 'Could not update asset. Please try again.');
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   async function onRefresh() {
     setRefreshing(true);
@@ -202,12 +257,20 @@ export default function ZakatScreen() {
                     <Text style={styles.assetDate}>
                       Since {formatDate(asset.hawl_start_date)}
                     </Text>
-                    <Pressable
-                      style={styles.deleteBtn}
-                      onPress={() => confirmDelete(asset.id, asset.description)}
-                    >
-                      <Ionicons name="trash-outline" size={16} color={Colors.error} />
-                    </Pressable>
+                    <View style={styles.assetActions}>
+                      <Pressable
+                        style={styles.editBtn}
+                        onPress={() => openEdit(asset)}
+                      >
+                        <Ionicons name="pencil-outline" size={16} color={Colors.primary} />
+                      </Pressable>
+                      <Pressable
+                        style={styles.deleteBtn}
+                        onPress={() => confirmDelete(asset.id, asset.description)}
+                      >
+                        <Ionicons name="trash-outline" size={16} color={Colors.error} />
+                      </Pressable>
+                    </View>
                   </View>
                 </Card>
               </FadeSlideIn>
@@ -217,6 +280,78 @@ export default function ZakatScreen() {
       )}
 
       <FAB onPress={() => router.push('/zakat/add-asset')} />
+
+      {/* ── Edit Asset Modal ── */}
+      <Modal
+        visible={editingAsset !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={closeEdit}
+      >
+        <TouchableWithoutFeedback onPress={closeEdit}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalKav}
+          pointerEvents="box-none"
+        >
+          <Animated.View style={[styles.modalSheet, modalSheetStyle]}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>Edit Asset</Text>
+                {editingAsset && (
+                  <Text style={styles.modalSubtitle}>
+                    {AssetConfig[editingAsset.asset_type]?.label ?? editingAsset.asset_type}
+                  </Text>
+                )}
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Description</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editDesc}
+                    onChangeText={setEditDesc}
+                    placeholder="e.g. Current account"
+                    placeholderTextColor={Colors.textTertiary}
+                    returnKeyType="next"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Value (£)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editValue}
+                    onChangeText={setEditValue}
+                    placeholder="0.00"
+                    placeholderTextColor={Colors.textTertiary}
+                    keyboardType="decimal-pad"
+                    returnKeyType="done"
+                    onSubmitEditing={saveEdit}
+                  />
+                </View>
+
+                <View style={styles.modalBtns}>
+                  <Pressable style={[styles.modalBtn, styles.modalBtnCancel]} onPress={closeEdit}>
+                    <Text style={styles.modalBtnCancelText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.modalBtn, styles.modalBtnSave, editSaving && { opacity: 0.6 }]}
+                    onPress={saveEdit}
+                    disabled={editSaving}
+                  >
+                    <Text style={styles.modalBtnSaveText}>
+                      {editSaving ? 'Saving…' : 'Save'}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -304,5 +439,91 @@ const styles = StyleSheet.create({
 
   assetFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   assetDate: { fontSize: Typography.xs, color: Colors.textTertiary },
+  assetActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  editBtn: { padding: 4 },
   deleteBtn: { padding: 4 },
+
+  // Modal
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  modalKav: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
+    padding: Spacing.xl,
+    paddingBottom: Spacing.xxxl,
+    gap: Spacing.lg,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: Typography.xl,
+    fontWeight: Typography.bold,
+    color: Colors.textPrimary,
+  },
+  modalSubtitle: {
+    fontSize: Typography.sm,
+    color: Colors.textSecondary,
+    marginTop: -Spacing.md,
+  },
+  inputGroup: { gap: 6 },
+  inputLabel: {
+    fontSize: Typography.xs,
+    fontWeight: Typography.semibold,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  input: {
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
+    fontSize: Typography.base,
+    color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalBtns: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.xs,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnCancel: {
+    backgroundColor: Colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalBtnCancelText: {
+    fontSize: Typography.base,
+    fontWeight: Typography.medium,
+    color: Colors.textSecondary,
+  },
+  modalBtnSave: {
+    backgroundColor: Colors.primary,
+  },
+  modalBtnSaveText: {
+    fontSize: Typography.base,
+    fontWeight: Typography.semibold,
+    color: Colors.textInverse,
+  },
 });

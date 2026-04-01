@@ -211,6 +211,14 @@ export default function LearnPathScreen() {
 
               {/* ── Lesson Nodes ── */}
               <View style={styles.nodesContainer}>
+                {/* Centered vertical connector line */}
+                <View
+                  style={[
+                    styles.verticalLine,
+                    { backgroundColor: chapterDone ? chapter.color : Colors.border },
+                  ]}
+                  pointerEvents="none"
+                />
                 {chapter.lessons.map((lesson, lessonIdx) => {
                   const key = `${chapter.id}_${lesson.id}`;
                   const lessonStars = stars[key] ?? 0;
@@ -236,22 +244,6 @@ export default function LearnPathScreen() {
                         { transform: [{ translateX: zigzagX }] },
                       ]}
                     >
-                      {/* Connector line to previous (skip first) */}
-                      {lessonIdx > 0 && (
-                        <View
-                          style={[
-                            styles.connector,
-                            {
-                              backgroundColor: completed
-                                ? chapter.color
-                                : Colors.border,
-                              left: nodeSize / 2 - 2,
-                              top: -20,
-                              height: 20,
-                            },
-                          ]}
-                        />
-                      )}
 
                       {/* The node */}
                       <Pressable
@@ -515,18 +507,23 @@ const styles = StyleSheet.create({
 
   // ── Nodes ──
   nodesContainer: {
+    width: PATH_WIDTH,
     alignItems: 'center',
     paddingBottom: Spacing.xl,
     gap: Spacing.lg,
   },
+  verticalLine: {
+    position: 'absolute',
+    width: 3,
+    top: NODE_SIZE / 2,
+    bottom: Spacing.xl,
+    left: PATH_WIDTH / 2 - 1.5,
+    borderRadius: 2,
+    opacity: 0.35,
+  },
   nodeRow: {
     alignItems: 'center',
     gap: Spacing.xs,
-  },
-  connector: {
-    position: 'absolute',
-    width: 4,
-    borderRadius: 2,
   },
   node: {
     alignItems: 'center',

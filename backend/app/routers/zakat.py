@@ -78,3 +78,9 @@ async def finalise_zakat(
 async def list_records(user_id: CurrentUserId, db: DbSession):
     """Return the user's historical Zakat records, newest first."""
     return await ZakatService(db).get_records(user_id)
+
+
+@router.get("/records/{record_id}", response_model=ZakatRecordResponse)
+async def get_record(record_id: str, user_id: CurrentUserId, db: DbSession):
+    """Return a single Zakat record by ID for the authenticated user."""
+    return await ZakatService(db).get_record_by_id(user_id, record_id)

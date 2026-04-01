@@ -1,6 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
 import {
   Pressable,
   RefreshControl,
@@ -19,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
+import { CHAPTERS } from '@/constants/learnData';
 import { useNisab } from '@/lib/hooks/useNisab';
 import { useWatchlist } from '@/lib/hooks/useScreening';
 import { useZakatAssets, useZakatCalculation } from '@/lib/hooks/useZakat';
@@ -64,6 +66,35 @@ export default function DashboardScreen() {
 
   const [refreshing, setRefreshing] = React.useState(false);
   const [trackWidth, setTrackWidth] = React.useState(0);
+  const [totalXP, setTotalXP] = React.useState(0);
+  const [completedLessons, setCompletedLessons] = React.useState(0);
+
+  const totalLessons = CHAPTERS.reduce((sum, ch) => sum + ch.lessons.length, 0);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function loadLearnStats() {
+        try {
+          const keys: string[] = ['learn_total_xp'];
+          for (const ch of CHAPTERS) {
+            for (const l of ch.lessons) {
+              keys.push(`learn_${ch.id}_${l.id}_stars`);
+            }
+          }
+          const pairs = await AsyncStorage.multiGet(keys);
+          let xp = 0;
+          let completed = 0;
+          for (const [key, value] of pairs) {
+            if (key === 'learn_total_xp') xp = parseInt(value ?? '0', 10) || 0;
+            else if (key.endsWith('_stars') && parseInt(value ?? '0', 10) > 0) completed++;
+          }
+          setTotalXP(xp);
+          setCompletedLessons(completed);
+        } catch (_) {}
+      }
+      loadLearnStats();
+    }, [])
+  );
 
   const progressAnim = useSharedValue(0);
 
@@ -189,6 +220,31 @@ export default function DashboardScreen() {
                   : nisabInsight}
               </Text>
             </View>
+
+            {/* Next Hawl date */}
+            {(() => {
+              if (!assets?.length) return null;
+              const now = Date.now();
+              const upcoming = assets
+                .map((a) => new Date(new Date(a.hawl_start_date).getTime() + 354.37 * 86_400_000))
+                .filter((d) => d.getTime() > now)
+                .sort((a, b) => a.getTime() - b.getTime());
+              if (!upcoming.length) return null;
+              const next = upcoming[0];
+              const daysLeft = Math.ceil((next.getTime() - now) / 86_400_000);
+              const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              const dateStr = `${next.getDate()} ${months[next.getMonth()]} ${next.getFullYear()}`;
+              return (
+                <View style={[styles.zakatInsightRow, { marginTop: 2 }]}>
+                  <Ionicons name="calendar-outline" size={14} color={Colors.textTertiary} />
+                  <Text style={styles.zakatInsightText}>
+                    {daysLeft <= 7
+                      ? `Next Hawl in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} · ${dateStr}`
+                      : `Next Hawl: ${dateStr}`}
+                  </Text>
+                </View>
+              );
+            })()}
           </>
         )}
       </Card>
@@ -212,9 +268,15 @@ export default function DashboardScreen() {
           <View style={[styles.statIcon, { backgroundColor: Colors.primaryMuted }]}>
             <Ionicons name="book" size={20} color={Colors.primary} />
           </View>
-          <Text style={styles.statValue}>5</Text>
-          <Text style={styles.statLabel}>Topics to explore</Text>
-          <Text style={styles.statSubtext}>Islamic finance basics</Text>
+          <Text style={styles.statValue}>
+            {completedLessons > 0 ? `${completedLessons}/${totalLessons}` : `${totalLessons}`}
+          </Text>
+          <Text style={styles.statLabel}>
+            {completedLessons > 0 ? 'Lessons done' : 'Lessons to explore'}
+          </Text>
+          <Text style={styles.statSubtext}>
+            {totalXP > 0 ? `${totalXP} XP earned` : 'Islamic finance basics'}
+          </Text>
         </Pressable>
 
         {/* Portfolio card */}

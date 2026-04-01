@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -25,6 +25,19 @@ export default function ProfileScreen() {
 
   const [hawlReminders, setHawlReminders] = useState(false);
   const [zakatReminders, setZakatReminders] = useState(true);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const vals = await AsyncStorage.multiGet(['profile_hawl_reminder', 'profile_annual_reminder']);
+        for (const [key, val] of vals) {
+          if (key === 'profile_hawl_reminder' && val !== null) setHawlReminders(val === 'true');
+          if (key === 'profile_annual_reminder' && val !== null) setZakatReminders(val === 'true');
+        }
+      } catch (_) {}
+    }
+    loadSettings();
+  }, []);
 
   const initials = user?.fullName
     ? user.fullName
@@ -95,7 +108,10 @@ export default function ProfileScreen() {
           right={
             <Switch
               value={hawlReminders}
-              onValueChange={setHawlReminders}
+              onValueChange={(v) => {
+                setHawlReminders(v);
+                AsyncStorage.setItem('profile_hawl_reminder', String(v));
+              }}
               trackColor={{ true: Colors.primary }}
               thumbColor={Colors.surface}
             />
@@ -110,7 +126,10 @@ export default function ProfileScreen() {
           right={
             <Switch
               value={zakatReminders}
-              onValueChange={setZakatReminders}
+              onValueChange={(v) => {
+                setZakatReminders(v);
+                AsyncStorage.setItem('profile_annual_reminder', String(v));
+              }}
               trackColor={{ true: Colors.primary }}
               thumbColor={Colors.surface}
             />

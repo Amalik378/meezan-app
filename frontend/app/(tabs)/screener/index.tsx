@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -33,6 +34,13 @@ export default function ScreenerScreen() {
   const [submittedTicker, setSubmittedTicker] = useState('');
   const [browseTicker, setBrowseTicker] = useState('');
   const [watchlistError, setWatchlistError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('screener_history')
+      .then((v) => { if (v) setSearchHistory(JSON.parse(v)); })
+      .catch(() => {});
+  }, []);
 
   const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'JPM', 'NESN', '2222.SR'];
 
@@ -50,7 +58,17 @@ export default function ScreenerScreen() {
 
   function handleSearch() {
     const ticker = searchQuery.trim().toUpperCase();
-    if (ticker.length > 0) setSubmittedTicker(ticker);
+    if (ticker.length > 0) {
+      setSubmittedTicker(ticker);
+      const updated = [ticker, ...searchHistory.filter((t) => t !== ticker)].slice(0, 5);
+      setSearchHistory(updated);
+      AsyncStorage.setItem('screener_history', JSON.stringify(updated)).catch(() => {});
+    }
+  }
+
+  function handleHistoryTap(ticker: string) {
+    setSearchQuery(ticker);
+    setSubmittedTicker(ticker);
   }
 
   async function handleAddToWatchlist(ticker: string) {
@@ -110,6 +128,25 @@ export default function ScreenerScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Recent Searches ── */}
+        {searchHistory.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Recent Searches</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+              {searchHistory.map((ticker) => (
+                <Pressable
+                  key={ticker}
+                  style={styles.historyChip}
+                  onPress={() => handleHistoryTap(ticker)}
+                >
+                  <Ionicons name="time-outline" size={12} color={Colors.textSecondary} />
+                  <Text style={styles.historyChipText}>{ticker}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* ── Popular Stocks ── */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Popular Stocks</Text>
@@ -377,6 +414,22 @@ const styles = StyleSheet.create({
   errorBoxText: { fontSize: Typography.sm, color: Colors.error, lineHeight: 20 },
 
   chipsRow: { gap: Spacing.sm, paddingVertical: Spacing.xs },
+  historyChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  historyChipText: {
+    fontSize: Typography.sm,
+    fontWeight: Typography.medium,
+    color: Colors.textSecondary,
+  },
   chip: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,

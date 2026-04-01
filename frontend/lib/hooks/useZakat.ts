@@ -50,6 +50,18 @@ export function useDeleteAsset() {
   });
 }
 
+export function useUpdateAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<AddAssetPayload> }) =>
+      zakatApi.updateAsset(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: zakatKeys.assets });
+      qc.invalidateQueries({ queryKey: ['zakat', 'calculation'] });
+    },
+  });
+}
+
 export function useFinaliseZakat() {
   const qc = useQueryClient();
   return useMutation({

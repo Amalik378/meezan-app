@@ -234,6 +234,20 @@ class ZakatService:
         records = result.scalars().all()
         return [ZakatRecordResponse.model_validate(r) for r in records]
 
+    async def get_record_by_id(self, user_id: str, record_id: str) -> ZakatRecordResponse:
+        from fastapi import HTTPException
+        result = await self.db.execute(
+            select(ZakatRecord)
+            .where(
+                ZakatRecord.id == uuid.UUID(record_id),
+                ZakatRecord.user_id == uuid.UUID(user_id),
+            )
+        )
+        record = result.scalar_one_or_none()
+        if record is None:
+            raise HTTPException(status_code=404, detail="Record not found")
+        return ZakatRecordResponse.model_validate(record)
+
     # ── Helpers ────────────────────────────────────────────────────────────────
 
     async def _get_active_assets(self, user_id: str) -> list[ZakatAsset]:
