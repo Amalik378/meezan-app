@@ -62,6 +62,7 @@ export default function OnboardingScreen() {
 
   async function handleFinish() {
     await completeOnboarding();
+    router.replace('/(auth)/register');
   }
 
   function goToSlide(index: number) {

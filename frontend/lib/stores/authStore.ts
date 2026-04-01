@@ -96,13 +96,18 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     // ── Dev mode: skip Supabase, use static token ──────────────────────────
     if (DEV_MODE) {
-      await authStorage.setItem('access_token', 'dev');
-      // Restore any user details saved from a previous signUp/signIn
       const storedDevUser = await AsyncStorage.getItem('dev_user');
-      let user = storedDevUser ? JSON.parse(storedDevUser) : { ...DEV_USER };
-      // Migration: strip legacy 'Developer' placeholder name stored by older builds
-      if (user.fullName === 'Developer') user = { ...user, fullName: undefined };
-      set({ user, isAuthenticated: true, isLoading: false, onboardingDone });
+      if (storedDevUser) {
+        // Returning user — restore session
+        let user = JSON.parse(storedDevUser);
+        // Migration: strip legacy 'Developer' placeholder name stored by older builds
+        if (user.fullName === 'Developer') user = { ...user, fullName: undefined };
+        await authStorage.setItem('access_token', 'dev');
+        set({ user, isAuthenticated: true, isLoading: false, onboardingDone });
+      } else {
+        // New user — not authenticated, must register
+        set({ isLoading: false, onboardingDone });
+      }
       return;
     }
 
