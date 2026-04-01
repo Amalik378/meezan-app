@@ -21,7 +21,7 @@ type IoniconName = keyof typeof Ionicons.glyphMap;
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, resetOnboarding } = useAuthStore();
 
   const [hawlReminders, setHawlReminders] = useState(false);
   const [zakatReminders, setZakatReminders] = useState(true);
@@ -70,9 +70,8 @@ export default function ProfileScreen() {
   }
 
   async function handleResetOnboarding() {
-    await AsyncStorage.removeItem('onboarding_done');
-    // No need to update store — will re-read on next app launch
-    Alert.alert('Reset', 'Onboarding will show again on next launch.');
+    await resetOnboarding(); // clears AsyncStorage + sets onboardingDone: false in store
+    router.replace('/onboarding');
   }
 
   return (
