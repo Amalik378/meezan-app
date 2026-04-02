@@ -10,7 +10,7 @@ services:
         value: "false"
       - key: DATABASE_URL
         sync: false
-      - key: JWT_SECRET
+      - key: SUPABASE_JWT_SECRET
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
