@@ -18,8 +18,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/components/ui/Card';
+import { DonutChart } from '@/components/ui/DonutChart';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
+import { AssetConfig, Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
 import { CHAPTERS } from '@/constants/learnData';
 import { useNisab } from '@/lib/hooks/useNisab';
 import { useWatchlist } from '@/lib/hooks/useScreening';
@@ -257,6 +258,25 @@ export default function DashboardScreen() {
           <Text style={styles.quoteSource}>— {quote.source}</Text>
         </View>
       </View>
+
+      {/* ── Asset Allocation Chart ── */}
+      {zakatCalc?.breakdown?.some((b) => b.total_value_gbp > 0) && (
+        <Card padding="lg" style={{ gap: Spacing.base }}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionAccent} />
+            <Text style={styles.sectionTitle}>Asset Allocation</Text>
+          </View>
+          <DonutChart
+            segments={zakatCalc.breakdown
+              .filter((b) => b.total_value_gbp > 0)
+              .map((b) => ({
+                label: AssetConfig[b.asset_type]?.label ?? b.asset_type,
+                value: b.total_value_gbp,
+                color: AssetConfig[b.asset_type]?.color ?? Colors.primary,
+              }))}
+          />
+        </Card>
+      )}
 
       {/* ── Stats Row ── */}
       <View style={styles.statsRow}>
